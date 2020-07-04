@@ -2,6 +2,27 @@ pub mod reader;
 pub mod core;
 pub mod interpreter;
 
+use std::os::raw::{c_char};
+use std::ffi::{CString, CStr};
+
+
+
+#[no_mangle]
+pub extern fn scheme(to: *const c_char) -> *mut c_char {
+    let c_str = unsafe { CStr::from_ptr(to) };
+    let interp_string = match c_str.to_str() {
+        Err(_) => "",
+        Ok(string) => string,
+    };
+    let interpreter = interpreter::interpreter::new("cps");
+    let result = interpreter.execute(interp_string);
+    match result {
+        Ok(v) => return CString::new(v).unwrap().into_raw(),
+        Err(e) => return CString::new("Error").unwrap().into_raw(),
+    }
+}
+
+
 //pub mod lexer;
 //mod parser;
 //mod interpreter;
