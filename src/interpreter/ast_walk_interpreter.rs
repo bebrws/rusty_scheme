@@ -174,6 +174,7 @@ impl Environment {
             ("displayln", Function::Native(native_displayln)),
             ("print", Function::Native(native_print)),
             ("newline", Function::Native(native_newline)),
+            ("exit", Function::Native(native_exit)),
             ];
         for item in predefined_functions.iter() {
             let (name, ref func) = *item;
@@ -827,6 +828,16 @@ fn native_print(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, 
     }
     Ok(null!())
 }
+
+#[allow(unused_variables)]
+fn native_exit(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, RuntimeError> {
+    if args.len() != 0 {
+        runtime_error!("Must supply exactly zero arguments to exit: {:?}", args);
+    }
+    
+    std::process::exit(0);
+}
+
 
 #[allow(unused_variables)]
 fn native_newline(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, RuntimeError> {
