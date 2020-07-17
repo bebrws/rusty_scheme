@@ -5,10 +5,13 @@ pub mod interpreter;
 use std::os::raw::{c_char};
 use std::ffi::{CString, CStr};
 
+use interpreter::ast_walk_interpreter::pixels;
 
 
 #[no_mangle]
-pub extern fn scheme(to: *const c_char) -> *mut c_char {
+pub unsafe extern fn scheme(to: *const c_char, new_pixels: *mut c_char) -> *mut c_char {
+    
+    pixels = new_pixels;
     let c_str = unsafe { CStr::from_ptr(to) };
     let interp_string = match c_str.to_str() {
         Err(_) => "",

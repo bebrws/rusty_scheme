@@ -5,6 +5,10 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+
+use std::os::raw::{c_char};
+use std::ffi::{CString, CStr};
+
 pub fn new() -> Interpreter {
     Interpreter::new()
 }
@@ -175,6 +179,8 @@ impl Environment {
             ("print", Function::Native(native_print)),
             ("newline", Function::Native(native_newline)),
             ("exit", Function::Native(native_exit)),
+            ("pixel", Function::Native(native_pixel)),
+            // ("clear", Function::Native(native_clear)), // TODO: Clear the bitmap
             ];
         for item in predefined_functions.iter() {
             let (name, ref func) = *item;
@@ -836,6 +842,43 @@ fn native_exit(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, R
     }
     
     std::process::exit(0);
+}
+
+
+
+// pub static mut pixels: *mut c_char = std::string::String::from("").into_bytes().as_mut_ptr() as *mut i8;
+pub static mut pixels: *mut c_char = std::ptr::null_mut();
+
+fn native_pixel(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, RuntimeError> {
+    // (pixel x y r g b a)
+    if args.len() != 5 {
+        runtime_error!("Must supply 6 arguments to pixel. (pixel x y red green blue). RGBA is 0-255: {:?}", args);
+    }
+
+    let x = &args[0];
+    let x = &args[1];
+    let r = &args[2];
+    let g = &args[3];
+    let b = &args[4];
+    let a = &args[5];
+
+    // let m:usize = *pixels as usize; 
+    // // let v = m.to_vec();
+    // m[0] = 0;
+    unsafe {
+        let mut ps = vec![pixels];
+
+        for n in 1..(300*300 - 1) {
+            *ps[n*4+1] = (n%255) as i8;
+        }
+    }
+
+    // *(pixels + 1) =  0;
+
+
+
+    print!("JUST SET the PIXELS COLOR");
+    Ok(null!())
 }
 
 
