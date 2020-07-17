@@ -7,6 +7,13 @@ use std::cell::RefCell;
 use std::iter;
 use std::vec;
 
+use std::os::raw::{c_char};
+use std::ffi::{CString, CStr};
+
+// pub static mut pixels: *mut c_char = std::string::String::from("").into_bytes().as_mut_ptr() as *mut i8;
+pub static mut pixels: *mut c_char = std::ptr::null_mut();
+
+
 pub fn new() -> Result<Interpreter, RuntimeError> {
     Interpreter::new()
 }
@@ -274,6 +281,17 @@ impl List {
         let (caddr, cdddr) = shift_or_error!(cddr, "Expected list of length 3, but was length 2");
         if !cdddr.is_empty() { runtime_error!("Expected list of length 3, but it had more elements") }
         Ok((car, cadr, caddr))
+    }
+
+    fn unpack6(self) -> Result<(Value, Value, Value, Value, Value, Value), RuntimeError> {
+        let (car, cdr) = shift_or_error!(self, "Expected list of length 3, but was empty");
+        let (cadr, cddr) = shift_or_error!(cdr, "Expected list of length 3, but was length 1");
+        let (caddr, cdddr) = shift_or_error!(cddr, "Expected list of length 3, but was length 2");
+        let (cadddr, cddddr) = shift_or_error!(cdddr, "Expected list of length 3, but was length 2");
+        let (caddddr, cdddddr) = shift_or_error!(cddddr, "Expected list of length 3, but was length 2");
+        let (cadddddr, cddddddr) = shift_or_error!(cdddddr, "Expected list of length 3, but was length 2");
+        if !cddddddr.is_empty() { runtime_error!("Expected list of length 3, but it had more elements") }
+        Ok((car, cadr, caddr, cadddr, caddddr, cadddddr))
     }
 
     fn reverse(self) -> List {
@@ -743,6 +761,8 @@ impl Environment {
         try!(env.define("write".to_string(), Value::Procedure(Function::Native("write"))));
         try!(env.define("display".to_string(), Value::Procedure(Function::Native("display"))));
         try!(env.define("displayln".to_string(), Value::Procedure(Function::Native("displayln"))));
+        try!(env.define("pixel".to_string(), Value::Procedure(Function::Native("pixel"))));
+        try!(env.define("clear".to_string(), Value::Procedure(Function::Native("clear"))));
         try!(env.define("print".to_string(), Value::Procedure(Function::Native("print"))));
         try!(env.define("newline".to_string(), Value::Procedure(Function::Native("newline"))));
         Ok(Rc::new(RefCell::new(env)))
@@ -930,6 +950,41 @@ fn primitive(f: &'static str, args: List) -> Result<Value, RuntimeError> {
             Ok(null!())
         },
         "displayln" => {
+            if args.len() != 1 {
+                runtime_error!("Must supply exactly one argument to displayln: {:?}", args);
+            }
+            let val = try!(args.unpack1());
+            println!("{}", val);
+            Ok(null!())
+        },
+        "pixel" => {
+            println!("in pixel");
+            if args.len() != 6 {
+                runtime_error!("Must supply 6 arguments to pixel. (pixel x y red green blue). RGBA is 0-255: {:?}", args);
+            }
+            // let val = try!(args.unpack1());
+            let (x, y, r, g, b, a) = try!(args.unpack6());
+
+            // let m:usize = *pixels as usize; 
+            // // let v = m.to_vec();
+            // m[0] = 0;
+            println!("Before update");
+            unsafe {
+                
+                
+                // println!("pixel 0 : {}", *pixels.offset(0));
+                for n in 1..(300*300 - 1) {
+                    *pixels.offset(n) = 1 as i8;
+                    
+                    *pixels.offset(n*4+1) = (n%255) as i8;
+                }
+            }
+            
+
+            println!("SETPIXEL");
+            Ok(null!())
+        },
+        "clear" => {
             if args.len() != 1 {
                 runtime_error!("Must supply exactly one argument to displayln: {:?}", args);
             }

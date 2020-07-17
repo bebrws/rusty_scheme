@@ -5,7 +5,7 @@ pub mod interpreter;
 use std::os::raw::{c_char};
 use std::ffi::{CString, CStr};
 
-use interpreter::ast_walk_interpreter::pixels;
+use interpreter::cps_interpreter::pixels;
 
 
 #[no_mangle]

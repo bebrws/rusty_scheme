@@ -1,3 +1,3 @@
 #include <stdint.h>
 
-const char* scheme(const char* to, char* pixels);
+const char* scheme(const char* to, char *pixels);

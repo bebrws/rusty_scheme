@@ -846,9 +846,6 @@ fn native_exit(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, R
 
 
 
-// pub static mut pixels: *mut c_char = std::string::String::from("").into_bytes().as_mut_ptr() as *mut i8;
-pub static mut pixels: *mut c_char = std::ptr::null_mut();
-
 fn native_pixel(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, RuntimeError> {
     // (pixel x y r g b a)
     if args.len() != 5 {
@@ -865,19 +862,14 @@ fn native_pixel(args: &[Value], env: Rc<RefCell<Environment>>) -> Result<Value, 
     // let m:usize = *pixels as usize; 
     // // let v = m.to_vec();
     // m[0] = 0;
-    unsafe {
-        let mut ps = vec![pixels];
+    println!("Before update");
 
-        for n in 1..(300*300 - 1) {
-            *ps[n*4+1] = (n%255) as i8;
-        }
-    }
 
     // *(pixels + 1) =  0;
 
 
 
-    print!("JUST SET the PIXELS COLOR");
+    println!("JUST SET the PIXELS COLOR");
     Ok(null!())
 }
 
